@@ -16,7 +16,7 @@ Welcome to the Microsoft Edge WebView2 API browser. Start with selecting the pro
 
 ## Products  
 
-<!-- We don;t explicitly expose the version number in the table entry, yet all documentations for a new version goes to a new version directory as soon as we generate them. -->
+<!-- We don't explicitly expose the version number in the table entry, yet all documentations for a new version goes to a new version directory as soon as we generate them. -->
 *   [Win32](reference/win32/reference-webview-v2.md)
 *   [.NET](reference/dotnet/reference-webview-v1.md)
 *   [WinForms](reference/winforms/reference-webview-v1.md)
