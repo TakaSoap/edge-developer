@@ -166,6 +166,8 @@
 # [WebView2 (developer preview)](webview2.md)
 ## [Getting Started](webview2/GettingStarted.md)
 ## [Release notes](webview2/ReleaseNotes.md)
+## Tooling
+### [WebDriver](webview2/Tooling/WebDriver.md)
 ## [Reference (WebView2)](webview2/reference-webview2.md)
 ### [ICoreWebView2](webview2/reference/ICoreWebView2.md)
 ### [ICoreWebView2Deferral](webview2/reference/ICoreWebView2Deferral.md)
@@ -227,7 +229,6 @@
 #### [ICoreWebView2ExperimentalCursorChangedEventHandler](webview2/reference/ICoreWebView2ExperimentalCursorChangedEventHandler.md)
 #### [ICoreWebView2ExperimentalEnvironment](webview2/reference/ICoreWebView2ExperimentalEnvironment.md)
 #### [ICoreWebView2ExperimentalPointerInfo](webview2/reference/ICoreWebView2ExperimentalPointerInfo.md)
-#### [Globals](webview2/reference/webview2experimental.idl.md)
 ### Archived
 #### [0.8.355 - Reference (WebView2)](webview2/reference/Archived/0.8.355-reference-webview2.md)
 ##### [IWebView2Deferral](webview2/reference/Archived/0.8.355/IWebView2Deferral.md)

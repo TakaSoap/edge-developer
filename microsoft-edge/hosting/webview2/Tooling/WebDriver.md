@@ -10,10 +10,10 @@ ms.technology: webview
 keywords: IWebView2, IWebView2WebView, webview2, webview, edge, ICoreWebView2, ICoreWebView2Host, Selenium, Microsoft Edge Driver
 ---
 
-# Automating and Testing WebView2 with Microsoft Edge Driver
+# Automating and Testing WebView2 with Microsoft Edge WebDriver
 Because WebView2 utilizes the Chromium web platform, WebView2 developers can take advantage of standard web tooling for debugging and automation. One such tool is Selenium, which implements the W3C [WebDriver](https://www.w3.org/TR/webdriver2/) API, which can be used to create automated tests that simulate user interactions.
 
-Here’s how to get started:
+Here's how to get started:
 
 ## Step 1: Download WebView2API Sample
 If you do not have an existing WebView2 project, download our [WebView2API Sample application](https://github.com/MicrosoftEdge/WebView2Samples/tree/master/WebView2APISample#webview2-api-sample), a comprehensive sample of the latest WebView2 SDK. Please double check that you have satisfied these [prerequisites](https://github.com/MicrosoftEdge/WebView2Samples/tree/master/WebView2APISample#prerequisites).
@@ -28,7 +28,7 @@ Follow the instructions to install [Microsoft Edge Driver](https://docs.microsof
 It is important to make sure that the version of Microsoft Edge Driver matches the version of Microsoft Edge that the application uses. For the WebView2API Sample to work, make sure that your version of Microsoft Edge is greater than or equal to the supported version of our latest SDK release found [in our Release Notes](https://docs.microsoft.com/microsoft-edge/hosting/webview2/releasenotes). To find out what version of Microsoft Edge you currently have, load `edge://settings/help` in the browser.
 
 ## Step 3: Add Selenium to the WebView2API Sample
-At this point you should have Microsoft Edge installed, built a WebView2 project, and installed Microsoft Edge Driver. Now, let’s get started using Selenium. 
+At this point you should have Microsoft Edge installed, built a WebView2 project, and installed Microsoft Edge Driver. Now, let's get started using Selenium. 
 
 > [!NOTE]
 > Selenium supports C#, Java, Python, Javascript, and Ruby. However, this guide will be in C#. 
