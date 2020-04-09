@@ -18,10 +18,10 @@ The Microsoft Edge WebView2 control enables you to host web content in your appl
 
 Please select your platform.
 
-This is directory level.
+<!-- This is directory level.
 > [!div class="op_single_selector"]
 > - [Win32](win32/)
-> - [.NET](dotnet/)
+> - [.NET](dotnet/) -->
 
 This is file level.
 > [!div class="op_single_selector"]
