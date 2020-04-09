@@ -3,7 +3,7 @@ description: Host web content in your Win32 app with the Microsoft Edge WebView2
 title: Microsoft Edge WebView2 for Win32 apps
 author: MSEdgeTeam
 ms.author: msedgedevrel
-ms.date: 04/08/2020
+ms.date: 02/26/2020
 ms.topic: reference
 ms.prod: microsoft-edge
 ms.technology: webview
@@ -11,6 +11,9 @@ keywords: IWebView2, IWebView2WebView, webview2, webview, win32 apps, win32, edg
 ---
 
 # interface ICoreWebView2Environment 
+
+> [!NOTE]
+> This interface may be altered or unavailable for releases after SDK version 0.9.430. Please refer to [Reference (WebView2)](../../../reference-webview2.md) for the latest API reference.
 
 ```
 interface ICoreWebView2Environment
@@ -25,7 +28,7 @@ This represents the WebView2 Environment.
 --------------------------------|---------------------------------------------
 [CreateCoreWebView2Host](#createcorewebview2host) | Asynchronously create a new WebView.
 [CreateWebResourceResponse](#createwebresourceresponse) | Create a new web resource response object.
-[get_BrowserVersionInfo](#get_browserversioninfo) | The browser version info of the current [ICoreWebView2Environment](#icorewebview2environment), including channel name if it is not the stable channel.
+[get_BrowserVersionInfo](#get_browserversioninfo) | The browser version info of the current [ICoreWebView2Environment](), including channel name if it is not the stable channel.
 [add_NewBrowserVersionAvailable](#add_newbrowserversionavailable) | The NewBrowserVersionAvailable event fires when a newer version of the Edge browser is installed and available to use via WebView2.
 [remove_NewBrowserVersionAvailable](#remove_newbrowserversionavailable) | Remove an event handler previously added with add_NewBrowserVersionAvailable.
 
@@ -42,6 +45,7 @@ Asynchronously create a new WebView.
 parentWindow is the HWND in which the WebView should be displayed and from which receive input. The WebView will add a child window to the provided window during WebView creation. Z-order and other things impacted by sibling window order will be affected accordingly.
 
 It is recommended that the application set Application User Model ID for the process or the application window. If none is set, during WebView creation a generated Application User Model ID is set to root window of parentWindow. 
+
 ```cpp
 // Create or recreate the WebView and its environment.
 void AppWindow::InitializeWebView()
@@ -53,12 +57,8 @@ void AppWindow::InitializeWebView()
 
     LPCWSTR subFolder = nullptr;
     LPCWSTR additionalBrowserSwitches = nullptr;
-    auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
-    CHECK_FAILURE(options->put_AdditionalBrowserArguments(additionalBrowserSwitches));
-    if(!m_language.empty())
-        CHECK_FAILURE(options->put_Language(m_language.c_str()));
-    HRESULT hr = CreateCoreWebView2EnvironmentWithOptions(
-        subFolder, nullptr, options.Get(),
+    HRESULT hr = CreateCoreWebView2EnvironmentWithDetails(
+        subFolder, nullptr, additionalBrowserSwitches,
         Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
             this, &AppWindow::OnCreateEnvironmentCompleted)
             .Get());
@@ -95,7 +95,9 @@ HRESULT AppWindow::OnCreateEnvironmentCompleted(
     return S_OK;
 }
 ```
+
  It is recommended that the application handles restart manager messages so that it can be restarted gracefully in the case when the app is using Edge for webview from a certain installation and that installation is being uninstalled. For example, if a user installs Edge from Dev channel and opts to use Edge from that channel for testing the app, and then uninstalls Edge from that channel without closing the app, the app will be restarted to allow uninstallation of the dev channel to succeed. 
+
 ```cpp
     case WM_QUERYENDSESSION:
     {
@@ -117,9 +119,6 @@ HRESULT AppWindow::OnCreateEnvironmentCompleted(
     }
     break;
 ```
- When the application retries CreateCoreWebView2Host upon failure, it is recommended that the application restarts from creating a new WebView2 Environment. If an Edge update happens, the version associated with a WebView2 Environment could have been removed and causing the object to no longer work. Creating a new WebView2 Environment will work as it uses the latest version.
-
-WebView creation will fail if there is already a running instance using the same user data folder, and the Environment objects have different EnvironmentOptions. For example, if there is already a WebView created with one language, trying to create a WebView with a different language using the same user data folder will fail.
 
 #### CreateWebResourceResponse 
 
@@ -166,7 +165,7 @@ The headers is the raw response header string delimited by newline. It's also po
 
 #### get_BrowserVersionInfo 
 
-The browser version info of the current [ICoreWebView2Environment](#icorewebview2environment), including channel name if it is not the stable channel.
+The browser version info of the current [ICoreWebView2Environment](), including channel name if it is not the stable channel.
 
 > public HRESULT [get_BrowserVersionInfo](#get_browserversioninfo)(LPWSTR * versionInfo)
 
@@ -196,8 +195,16 @@ Because a user data folder can only be used by one browser process at a time, if
     // This handler tells when there is a new Edge version available on the machine.
     CHECK_FAILURE(m_webViewEnvironment->add_NewBrowserVersionAvailable(
         Callback<ICoreWebView2NewBrowserVersionAvailableEventHandler>(
-            [this](ICoreWebView2Environment* sender, IUnknown* args) -> HRESULT {
+            [this](
+                ICoreWebView2Environment* sender,
+                ICoreWebView2NewBrowserVersionAvailableEventArgs* args) -> HRESULT {
+                // Get the version value from args
+                wil::unique_cotaskmem_string newVersion;
+                CHECK_FAILURE(args->get_NewVersion(&newVersion));
                 std::wstring message = L"We detected there is a new version for the browser.";
+                message += L"\n\nVersion number: ";
+                message += newVersion.get();
+                message += L"\n\n";
                 if (m_webView)
                 {
                     message += L"Do you want to restart the app? \n\n";

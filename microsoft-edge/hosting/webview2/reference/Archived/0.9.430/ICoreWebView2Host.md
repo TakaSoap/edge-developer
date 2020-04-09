@@ -3,7 +3,7 @@ description: Host web content in your Win32 app with the Microsoft Edge WebView2
 title: Microsoft Edge WebView2 for Win32 apps
 author: MSEdgeTeam
 ms.author: msedgedevrel
-ms.date: 04/08/2020
+ms.date: 02/26/2020
 ms.topic: reference
 ms.prod: microsoft-edge
 ms.technology: webview
@@ -11,6 +11,9 @@ keywords: IWebView2, IWebView2WebView, webview2, webview, win32 apps, win32, edg
 ---
 
 # interface ICoreWebView2Host 
+
+> [!NOTE]
+> This interface may be altered or unavailable for releases after SDK version 0.9.430. Please refer to [Reference (WebView2)](../../../reference-webview2.md) for the latest API reference.
 
 ```
 interface ICoreWebView2Host
@@ -43,9 +46,12 @@ This interface is the owner of the CoreWebView2 object, and provides support for
 [remove_AcceleratorKeyPressed](#remove_acceleratorkeypressed) | Remove an event handler previously added with add_AcceleratorKeyPressed.
 [get_ParentWindow](#get_parentwindow) | The parent window provided by the app that this WebView is using to render content.
 [put_ParentWindow](#put_parentwindow) | Set the parent window for the WebView.
-[NotifyParentWindowPositionChanged](#notifyparentwindowpositionchanged) | This is a notification separate from Bounds that tells WebView its parent (or any ancestor) HWND moved.
+[NotifyParentWindowPositionChanged](#notifyparentwindowpositionchanged) | This is a notification separate from put_Bounds that tells WebView its parent (or any ancestor) HWND moved.
 [Close](#close) | Closes the WebView and cleans up the underlying browser instance.
 [get_CoreWebView2](#get_corewebview2) | Gets the CoreWebView2 associated with this CoreWebView2Host.
+[CORE_WEBVIEW2_MOVE_FOCUS_REASON](#core_webview2_move_focus_reason) | Reason for moving focus.
+[CORE_WEBVIEW2_KEY_EVENT_KIND](#core_webview2_key_event_kind) | The type of key event that triggered an AcceleratorKeyPressed event.
+[CORE_WEBVIEW2_PHYSICAL_KEY_STATUS](#core_webview2_physical_key_status) | A structure representing the information packed into the LPARAM given to a Win32 key event.
 
 The CoreWebView2Host owns the CoreWebView2, and if all references to the CoreWebView2Host go away, the WebView will be closed.
 
@@ -137,7 +143,7 @@ The zoom factor for the WebView.
 
 > public HRESULT [get_ZoomFactor](#get_zoomfactor)(double * zoomFactor)
 
-Note that changing zoom factor could cause `window.innerWidth/innerHeight` and page layout to change. A zoom factor that is applied by the host by calling ZoomFactor becomes the new default zoom for the WebView. This zoom factor applies across navigations and is the zoom factor WebView is returned to when the user presses ctrl+0. When the zoom factor is changed by the user (resulting in the app receiving ZoomFactorChanged), that zoom applies only for the current page. Any user applied zoom is only for the current page and is reset on a navigation. Specifying a zoomFactor less than or equal to 0 is not allowed. WebView also has an internal supported zoom factor range. When a specified zoom factor is out of that range, it will be normalized to be within the range, and a ZoomFactorChanged event will be fired for the real applied zoom factor. When this range normalization happens, the ZoomFactor property will report the zoom factor specified during the previous modification of the ZoomFactor property until the ZoomFactorChanged event is received after webview applies the normalized zoom factor.
+Note that changing zoom factor could cause `window.innerWidth/innerHeight` and page layout to change. A zoom factor that is applied by the host by calling put_ZoomFactor becomes the new default zoom for the WebView. This zoom factor applies across navigations and is the zoom factor WebView is returned to when the user presses ctrl+0. When the zoom factor is changed by the user (resulting in the app receiving ZoomFactorChanged), that zoom applies only for the current page. Any user applied zoom is only for the current page and is reset on a navigation. Specifying a zoomFactor less than or equal to 0 is not allowed. WebView also has an internal supported zoom factor range. When a specified zoom factor is out of that range, it will be normalized to be within the range, and a ZoomFactorChanged event will be fired for the real applied zoom factor. When this range normalization happens, the ZoomFactor property will report the zoom factor specified during the previous modification of the ZoomFactor property until the ZoomFactorChanged event is received after webview applies the normalized zoom factor.
 
 #### put_ZoomFactor 
 
@@ -206,7 +212,7 @@ void ViewComponent::SetScale(float scale)
 
 Move focus into WebView.
 
-> public HRESULT [MoveFocus](#movefocus)(CORE_WEBVIEW2_MOVE_FOCUS_REASON reason)
+> public HRESULT [MoveFocus](#movefocus)([CORE_WEBVIEW2_MOVE_FOCUS_REASON](#core_webview2_move_focus_reason) reason)
 
 WebView will get focus and focus will be set to correspondent element in the page hosted in the WebView. For Programmatic reason, focus is set to previously focused element or the default element if there is no previously focused element. For Next reason, focus is set to the first element. For Previous reason, focus is set to the last element. WebView can also got focus through user interaction like clicking into WebView or Tab into it. For tabbing, the app can call MoveFocus with Next or Previous to align with tab and shift+tab respectively when it decides the WebView is the next tabbable element. Or, the app can call IsDialogMessage as part of its message loop to allow the platform to auto handle tabbing. The platform will rotate through all windows with WS_TABSTOP. When the WebView gets focus from IsDialogMessage, it will internally put the focus on the first or last element for tab and shift+tab respectively.
 
@@ -442,11 +448,12 @@ This will cause the WebView to reparent its window to the newly provided window.
 
 #### NotifyParentWindowPositionChanged 
 
-This is a notification separate from Bounds that tells WebView its parent (or any ancestor) HWND moved.
+This is a notification separate from put_Bounds that tells WebView its parent (or any ancestor) HWND moved.
 
 > public HRESULT [NotifyParentWindowPositionChanged](#notifyparentwindowpositionchanged)()
 
 This is needed for accessibility and certain dialogs in WebView to work correctly. 
+
 ```cpp
     if (message == WM_MOVE || message == WM_MOVING)
     {
@@ -512,4 +519,37 @@ void AppWindow::CloseWebView(bool cleanupUserDataFolder)
 Gets the CoreWebView2 associated with this CoreWebView2Host.
 
 > public HRESULT [get_CoreWebView2](#get_corewebview2)([ICoreWebView2](ICoreWebView2.md) ** coreWebView2)
+
+#### CORE_WEBVIEW2_MOVE_FOCUS_REASON 
+
+Reason for moving focus.
+
+> enum [CORE_WEBVIEW2_MOVE_FOCUS_REASON](#core_webview2_move_focus_reason)
+
+ Values                         | Descriptions
+--------------------------------|---------------------------------------------
+CORE_WEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC            | Code setting focus into WebView.
+CORE_WEBVIEW2_MOVE_FOCUS_REASON_NEXT            | Moving focus due to Tab traversal forward.
+CORE_WEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS            | Moving focus due to Tab traversal backward.
+
+#### CORE_WEBVIEW2_KEY_EVENT_KIND 
+
+The type of key event that triggered an AcceleratorKeyPressed event.
+
+> enum [CORE_WEBVIEW2_KEY_EVENT_KIND](#core_webview2_key_event_kind)
+
+ Values                         | Descriptions
+--------------------------------|---------------------------------------------
+CORE_WEBVIEW2_KEY_EVENT_KIND_KEY_DOWN            | Correspond to window message WM_KEYDOWN.
+CORE_WEBVIEW2_KEY_EVENT_KIND_KEY_UP            | Correspond to window message WM_KEYUP.
+CORE_WEBVIEW2_KEY_EVENT_KIND_SYSTEM_KEY_DOWN            | Correspond to window message WM_SYSKEYDOWN.
+CORE_WEBVIEW2_KEY_EVENT_KIND_SYSTEM_KEY_UP            | Correspond to window message WM_SYSKEYUP.
+
+#### CORE_WEBVIEW2_PHYSICAL_KEY_STATUS 
+
+A structure representing the information packed into the LPARAM given to a Win32 key event.
+
+> typedef [CORE_WEBVIEW2_PHYSICAL_KEY_STATUS](#core_webview2_physical_key_status)
+
+See the documentation for WM_KEYDOWN for details at [https://docs.microsoft.com/windows/win32/inputdev/wm-keydown](https://docs.microsoft.com/windows/win32/inputdev/wm-keydown)
 

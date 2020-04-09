@@ -3,7 +3,7 @@ description: Host web content in your Win32 app with the Microsoft Edge WebView2
 title: Microsoft Edge WebView2 for Win32 apps
 author: MSEdgeTeam
 ms.author: msedgedevrel
-ms.date: 04/08/2020
+ms.date: 02/26/2020
 ms.topic: reference
 ms.prod: microsoft-edge
 ms.technology: webview
@@ -12,23 +12,25 @@ keywords: IWebView2, IWebView2WebView, webview2, webview, win32 apps, win32, edg
 
 # Globals 
 
+> [!NOTE]
+> This interface may be altered or unavailable for releases after SDK version 0.9.430. Please refer to [Reference (WebView2)](../../../reference-webview2.md) for the latest API reference.
+
 ## Summary
 
  Members                        | Descriptions
 --------------------------------|---------------------------------------------
-[CreateCoreWebView2EnvironmentWithOptions](#createcorewebview2environmentwithoptions) | DLL export to create a WebView2 environment with a custom version of Edge, user data directory and/or additional options.
-[CreateCoreWebView2EnvironmentWithDetails](#createcorewebview2environmentwithdetails) | This API is going to be removed in next SDK release.
+[CreateCoreWebView2EnvironmentWithDetails](#createcorewebview2environmentwithdetails) | DLL export to create a WebView2 environment with a custom version of Edge, user data directory and/or additional browser switches.
 [CreateCoreWebView2Environment](#createcorewebview2environment) | Creates an evergreen WebView2 Environment using the installed Edge version.
 [GetCoreWebView2BrowserVersionInfo](#getcorewebview2browserversioninfo) | Get the browser version info including channel name if it is not the stable channel or the Embedded Edge.
 [CompareBrowserVersions](#comparebrowserversions) | This method is for anyone want to compare version correctly to determine which version is newer, older or same.
 
 ## Members
 
-#### CreateCoreWebView2EnvironmentWithOptions 
+#### CreateCoreWebView2EnvironmentWithDetails 
 
-> public STDAPI [CreateCoreWebView2EnvironmentWithOptions](#createcorewebview2environmentwithoptions)(PCWSTR browserExecutableFolder,PCWSTR userDataFolder,[ICoreWebView2EnvironmentOptions](ICoreWebView2EnvironmentOptions.md) * environmentOptions,[ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler](ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler.md) * environment_created_handler)
+> public STDAPI [CreateCoreWebView2EnvironmentWithDetails](#createcorewebview2environmentwithdetails)(PCWSTR browserExecutableFolder,PCWSTR userDataFolder,PCWSTR additionalBrowserArguments,[ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler](ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler.md) * environment_created_handler)
 
-DLL export to create a WebView2 environment with a custom version of Edge, user data directory and/or additional options.
+DLL export to create a WebView2 environment with a custom version of Edge, user data directory and/or additional browser switches.
 
 browserExecutableFolder is the relative path to the folder that contains the embedded Edge. The embedded Edge can be obtained by copying the version named folder of an installed Edge, like 73.0.52.0 sub folder of an installed 73.0.52.0 Edge. The folder should have msedge.exe, msedge.dll, etc. Use null or empty string for browserExecutableFolder to create WebView using Edge installed on the machine, in which case the API will try to find a compatible version of Edge installed on the machine according to the channel preference trying to find first per user install and then per machine install.
 
@@ -36,11 +38,11 @@ The default channel search order is stable, beta, dev, and canary. When there is
 
 userDataFolder can be specified to change the default user data folder location for WebView2. The path can be an absolute file path or a relative file path that is interpreted as relative to the current process's executable. Otherwise, for UWP apps, the default user data folder will be the app data folder for the package; for non-UWP apps, the default user data folder `{Executable File Name}.WebView2` will be created in the same directory next to the app executable. WebView2 creation can fail if the executable is running in a directory that the process doesn't have permission to create a new folder in. The app is responsible to clean up its user data folder when it is done.
 
-Note that as a browser process might be shared among WebViews, WebView creation will fail with HRESULT_FROM_WIN32(ERROR_INVALID_STATE) if the specified options does not match the options of the WebViews that are currently running in the shared browser process.
+additionalBrowserArguments can be specified to change the behavior of the WebView. These will be passed to the browser process as part of the command line. See [Run Chromium with Flags](https://aka.ms/RunChromiumWithFlags) for more information about command line switches to browser process. If the app is launched with a command line switch `--edge-webview-switches=xxx` the value of that switch (xxx in the above example) will also be appended to the browser process command line. Certain switches like `--user-data-dir` are internal and important to WebView. Those switches will be ignored even if specified. If the same switches are specified multiple times, the last one wins. Note that this also applies to switches like `--enable-features`. There is no attempt to merge the different values of the same switch. App process's command line `--edge-webview-switches` value are processed after the additionalBrowserArguments parameter is processed. Also note that as a browser process might be shared among WebViews, the switches are not guaranteed to be applied except for the first WebView that starts the browser process. If parsing failed for the specified switches, they will be ignored. `nullptr` will run browser process with no flags.
 
 environment_created_handler is the handler result to the async operation which will contain the WebView2Environment that got created.
 
-The browserExecutableFolder, userDataFolder and additionalBrowserArguments of the environmentOptions may be overridden by values either specified in environment variables or in the registry.
+The browserExecutableFolder, userDataFolder and additionalBrowserArguments members of the environmentParams may be overridden by values either specified in environment variables or in the registry.
 
 When creating a WebView2Environment the following environment variables are checked:
 
@@ -51,7 +53,7 @@ WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
 WEBVIEW2_RELEASE_CHANNEL_PREFERENCE
 ```
 
-If an override environment variable is found then we use the browserExecutableFolder, userDataFolder and additionalBrowserArguments values as replacements for the corresponding values in CreateCoreWebView2EnvironmentWithOptions parameters.
+If an override environment variable is found then we use the browserExecutableFolder, userDataFolder and additionalBrowserArguments values as replacements for the corresponding values in CreateCoreWebView2EnvironmentWithDetails parameters.
 
 While not strictly overrides, there exists additional environment variables that can be set:
 
@@ -109,15 +111,7 @@ If the Webview depends on an installed Edge and it is uninstalled any subsequent
 ERROR_PRODUCT_UNINSTALLED
 ```
 
-First we check with Root as HKLM and then HKCU. AppId is first set to the Application User Model ID of the caller's process, then if there's no corresponding registry key the AppId is set to the executable name of the caller's process, or if that isn't a registry key then '*'. If an override registry key is found then we use the browserExecutableFolder, userDataFolder and additionalBrowserArguments registry values as replacements for the corresponding values in CreateCoreWebView2EnvironmentWithOptions parameters.
-
-#### CreateCoreWebView2EnvironmentWithDetails 
-
-> public STDAPI [CreateCoreWebView2EnvironmentWithDetails](#createcorewebview2environmentwithdetails)(PCWSTR browserExecutableFolder,PCWSTR userDataFolder,PCWSTR additionalBrowserArguments,[ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler](ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler.md) * environment_created_handler)
-
-This API is going to be removed in next SDK release.
-
-Please use CreateCoreWebView2EnvironmentWithOptions.
+First we check with Root as HKLM and then HKCU. AppId is first set to the Application User Model ID of the caller's process, then if there's no corresponding registry key the AppId is set to the executable name of the caller's process, or if that isn't a registry key then '*'. If an override registry key is found then we use the browserExecutableFolder, userDataFolder and additionalBrowserArguments registry values as replacements for the corresponding values in CreateCoreWebView2EnvironmentWithDetails parameters. If any of those registry values isn't present, then the parameter passed to CreateCoreWebView2Environment is used.
 
 #### CreateCoreWebView2Environment 
 
@@ -125,7 +119,7 @@ Please use CreateCoreWebView2EnvironmentWithOptions.
 
 Creates an evergreen WebView2 Environment using the installed Edge version.
 
-This is equivalent to calling CreateCoreWebView2EnvironmentWithOptions with nullptr for browserExecutableFolder, userDataFolder, additionalBrowserArguments. See CreateCoreWebView2EnvironmentWithOptions for more details.
+This is equivalent to calling CreateCoreWebView2EnvironmentWithDetails with nullptr for browserExecutableFolder, userDataFolder, additionalBrowserArguments. See CreateCoreWebView2EnvironmentWithDetails for more details.
 
 #### GetCoreWebView2BrowserVersionInfo 
 

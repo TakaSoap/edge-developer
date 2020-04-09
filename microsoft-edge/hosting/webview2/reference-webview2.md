@@ -23,6 +23,7 @@ The Microsoft Edge WebView2 control enables you to host web content in your appl
 *   [ICoreWebView2Deferral](reference/ICoreWebView2Deferral.md)
 *   [ICoreWebView2DevToolsProtocolEventReceiver](reference/ICoreWebView2DevToolsProtocolEventReceiver.md)
 *   [ICoreWebView2Environment](reference/ICoreWebView2Environment.md)
+*   [ICoreWebView2EnvironmentOptions](reference/ICoreWebView2EnvironmentOptions.md)
 *   [ICoreWebView2Host](reference/ICoreWebView2Host.md)
 *   [ICoreWebView2HttpHeadersCollectionIterator](reference/ICoreWebView2HttpHeadersCollectionIterator.md)
 *   [ICoreWebView2HttpRequestHeaders](reference/ICoreWebView2HttpRequestHeaders.md)
@@ -39,7 +40,6 @@ The Microsoft Edge WebView2 control enables you to host web content in your appl
 *   [ICoreWebView2MoveFocusRequestedEventArgs](reference/ICoreWebView2MoveFocusRequestedEventArgs.md)
 *   [ICoreWebView2NavigationCompletedEventArgs](reference/ICoreWebView2NavigationCompletedEventArgs.md)
 *   [ICoreWebView2NavigationStartingEventArgs](reference/ICoreWebView2NavigationStartingEventArgs.md)
-*   [ICoreWebView2NewBrowserVersionAvailableEventArgs](reference/ICoreWebView2NewBrowserVersionAvailableEventArgs.md)
 *   [ICoreWebView2NewWindowRequestedEventArgs](reference/ICoreWebView2NewWindowRequestedEventArgs.md)
 *   [ICoreWebView2PermissionRequestedEventArgs](reference/ICoreWebView2PermissionRequestedEventArgs.md)
 *   [ICoreWebView2ProcessFailedEventArgs](reference/ICoreWebView2ProcessFailedEventArgs.md)
@@ -76,3 +76,12 @@ The Microsoft Edge WebView2 control enables you to host web content in your appl
 *   [ICoreWebView2WebResourceRequestedEventHandler](reference/ICoreWebView2WebResourceRequestedEventHandler.md)
 *   [ICoreWebView2WindowCloseRequestedEventHandler](reference/ICoreWebView2WindowCloseRequestedEventHandler.md)
 *   [ICoreWebView2ZoomFactorChangedEventHandler](reference/ICoreWebView2ZoomFactorChangedEventHandler.md)
+
+### Experimental interfaces
+
+*   [ICoreWebView2ExperimentalCompositionHost](reference/ICoreWebView2ExperimentalCompositionHost.md)
+*   [ICoreWebView2ExperimentalCreateCoreWebView2CompositionHostCompletedHandler](reference/ICoreWebView2ExperimentalCreateCoreWebView2CompositionHostCompletedHandler.md)
+*   [ICoreWebView2ExperimentalCursorChangedEventHandler](reference/ICoreWebView2ExperimentalCursorChangedEventHandler.md)
+*   [ICoreWebView2ExperimentalEnvironment](reference/ICoreWebView2ExperimentalEnvironment.md)
+*   [ICoreWebView2ExperimentalPointerInfo](reference/ICoreWebView2ExperimentalPointerInfo.md)
+*   [webview2experimental.idl](reference/webview2experimental.idl.md)

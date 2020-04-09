@@ -10,14 +10,14 @@ ms.technology: webview
 keywords: IWebView2, IWebView2WebView, webview2, webview, win32 apps, win32, edge, ICoreWebView2, ICoreWebView2Host, browser control, edge html
 ---
 
-# interface ICoreWebView2NewBrowserVersionAvailableEventHandler 
+# interface ICoreWebView2ExperimentalCursorChangedEventHandler 
 
 ```
-interface ICoreWebView2NewBrowserVersionAvailableEventHandler
+interface ICoreWebView2ExperimentalCursorChangedEventHandler
   : public IUnknown
 ```
 
-The caller implements this interface to receive NewBrowserVersionAvailable events.
+The caller implements this interface to receive CursorChanged events.
 
 ## Summary
 
@@ -25,11 +25,15 @@ The caller implements this interface to receive NewBrowserVersionAvailable event
 --------------------------------|---------------------------------------------
 [Invoke](#invoke) | Called to provide the implementer with the event args for the corresponding event.
 
+Use the Cursor property to get the new cursor.
+
 ## Members
 
 #### Invoke 
 
 Called to provide the implementer with the event args for the corresponding event.
 
-> public HRESULT [Invoke](#invoke)([ICoreWebView2Environment](ICoreWebView2Environment.md) * webviewEnvironment,IUnknown * args)
+> public HRESULT [Invoke](#invoke)(ICoreWebView2ExperimentalCompositionHost * sender,IUnknown * args)
+
+There are no event args and the args parameter will be null.
 

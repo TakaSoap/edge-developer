@@ -3,7 +3,7 @@ description: Host web content in your Win32 app with the Microsoft Edge WebView2
 title: Microsoft Edge WebView2 for Win32 apps
 author: MSEdgeTeam
 ms.author: msedgedevrel
-ms.date: 04/08/2020
+ms.date: 03/05/2020
 ms.topic: reference
 ms.prod: microsoft-edge
 ms.technology: webview
@@ -11,6 +11,9 @@ keywords: IWebView2, IWebView2WebView, webview2, webview, win32 apps, win32, edg
 ---
 
 # interface ICoreWebView2 
+
+> [!NOTE]
+> This interface may be altered or unavailable for releases after SDK version 0.9.430. Please refer to [Reference (WebView2)](../../../reference-webview2.md) for the latest API reference.
 
 ```
 interface ICoreWebView2
@@ -86,9 +89,6 @@ WebView2 enables you to host web content using the latest Edge web browser techn
 [CORE_WEBVIEW2_PERMISSION_STATE](#core_webview2_permission_state) | Response to a permission request.
 [CORE_WEBVIEW2_WEB_ERROR_STATUS](#core_webview2_web_error_status) | Error status values for web navigations.
 [CORE_WEBVIEW2_WEB_RESOURCE_CONTEXT](#core_webview2_web_resource_context) | Enum for web resource request contexts.
-[CORE_WEBVIEW2_MOVE_FOCUS_REASON](#core_webview2_move_focus_reason) | Reason for moving focus.
-[CORE_WEBVIEW2_KEY_EVENT_KIND](#core_webview2_key_event_kind) | The type of key event that triggered an AcceleratorKeyPressed event.
-[CORE_WEBVIEW2_PHYSICAL_KEY_STATUS](#core_webview2_physical_key_status) | A structure representing the information packed into the LPARAM given to a Win32 key event.
 
 ## Navigation events
 
@@ -326,6 +326,7 @@ SourceChanged fires when the Source property changes.
 > public HRESULT [add_SourceChanged](#add_sourcechanged)([ICoreWebView2SourceChangedEventHandler](ICoreWebView2SourceChangedEventHandler.md) * eventHandler,EventRegistrationToken * token)
 
 SourceChanged fires for navigating to a different site or fragment navigations. It will not fires for other types of navigations such as page reloads or history.pushState with the same URL as the current page. SourceChanged fires before ContentLoading for navigation to a new document. Add an event handler for the SourceChanged event. 
+
 ```cpp
     // Register a handler for the SourceChanged event.
     // This handler will read the webview's source URI and update
@@ -360,7 +361,8 @@ HistoryChange listen to the change of navigation history for the top level docum
 
 > public HRESULT [add_HistoryChanged](#add_historychanged)([ICoreWebView2HistoryChangedEventHandler](ICoreWebView2HistoryChangedEventHandler.md) * eventHandler,EventRegistrationToken * token)
 
-Use HistoryChange to check if CanGoBack/CanGoForward value has changed. HistoryChanged also fires for using GoBack/GoForward. HistoryChanged fires after SourceChanged and ContentLoading. Add an event handler for the HistoryChanged event. 
+Use HistoryChange to check if get_CanGoBack/get_CanGoForward value has changed. HistoryChanged also fires for using GoBack/GoForward. HistoryChanged fires after SourceChanged and ContentLoading. Add an event handler for the HistoryChanged event. 
+
 ```cpp
     // Register a handler for the HistoryChanged event.
     // Update the Back, Forward buttons.
@@ -628,17 +630,6 @@ Fires when a WebView process terminated unexpectedly or become unresponsive.
                 m_appWindow->ReinitializeWebView();
             }
         }
-        else if (failureType == CORE_WEBVIEW2_PROCESS_FAILED_KIND_RENDER_PROCESS_EXITED)
-        {
-            int button = MessageBox(
-                m_appWindow->GetMainWindow(),
-                L"Browser render process exited unexpectedly. Reload page?",
-                L"Web page unresponsive", MB_YESNO);
-            if (button == IDYES)
-            {
-                CHECK_FAILURE(m_webView->Reload());
-            }
-        }
         return S_OK;
     }).Get(), &m_processFailedToken));
 ```
@@ -657,7 +648,7 @@ Add the provided JavaScript to a list of scripts that should be executed after t
 
 The injected script will apply to all future top level document and child frame navigations until removed with RemoveScriptToExecuteOnDocumentCreated. This is applied asynchronously and you must wait for the completion handler to run before you can be sure that the script is ready to execute on future navigations.
 
-Note that if an HTML document has sandboxing of some kind via [sandbox](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) properties or the [Content-Security-Policy HTTP header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) this will affect the script run here. So, for example, if the 'allow-modals' keyword is not set then calls to the `alert` function will be ignored.
+Note that if an HTML document has sandboxing of some kind via [sandbox](https://developer.mozilla.org/docs/Web/HTML/Element/iframe#attr-sandbox) properties or the [Content-Security-Policy HTTP header](https://developer.mozilla.org/docs/Web/HTTP/Headers/Content-Security-Policy) this will affect the script run here. So, for example, if the 'allow-modals' keyword is not set then calls to the `alert` function will be ignored.
 
 ```cpp
 // Prompt the user for some script and register it to execute whenever a new page loads.
@@ -792,10 +783,12 @@ Post the specified webMessage to the top level document in this WebView.
 > public HRESULT [PostWebMessageAsJson](#postwebmessageasjson)(LPCWSTR webMessageAsJson)
 
 The top level document's window.chrome.webview's message event fires. JavaScript in that document may subscribe and unsubscribe to the event via the following: 
+
 ```cpp
 window.chrome.webview.addEventListener('message', handler)
 window.chrome.webview.removeEventListener('message', handler)
 ```
+
  The event args is an instance of `MessageEvent`. The ICoreWebView2Settings::IsWebMessageEnabled setting must be true or this method will fail with E_INVALIDARG. The event arg's data property is the webMessage string parameter parsed as a JSON string into a JavaScript object. The event arg's source property is a reference to the `window.chrome.webview` object. See SetWebMessageReceivedEventHandler for information on sending messages from the HTML document in the webview to the host. This message is sent asynchronously. If a navigation occurs before the message is posted to the page, then the message will not be sent.
 
 ```cpp
@@ -870,6 +863,7 @@ The postMessage function is `void postMessage(object)` where object is any objec
             window.chrome.webview.postMessage("GetWindowBounds");
         }
 ```
+
  When postMessage is called, the [ICoreWebView2WebMessageReceivedEventHandler](ICoreWebView2WebMessageReceivedEventHandler.md) set via this SetWebMessageReceivedEventHandler method will be invoked with the postMessage's object parameter converted to a JSON string.
 
 ```cpp
@@ -969,7 +963,7 @@ Returns true if the webview can navigate to a previous page in the navigation hi
 
 > public HRESULT [get_CanGoBack](#get_cangoback)(BOOL * canGoBack)
 
-The HistoryChanged event will fire if CanGoBack changes value.
+The HistoryChanged event will fire if get_CanGoBack changes value.
 
 #### get_CanGoForward 
 
@@ -977,7 +971,7 @@ Returns true if the webview can navigate to a next page in the navigation histor
 
 > public HRESULT [get_CanGoForward](#get_cangoforward)(BOOL * canGoForward)
 
-The HistoryChanged event will fire if CanGoForward changes value.
+The HistoryChanged event will fire if get_CanGoForward changes value.
 
 #### GoBack 
 
@@ -1067,30 +1061,13 @@ Fires when content inside the WebView requested to open a new window, such as th
     // the request.
     CHECK_FAILURE(m_webView->add_NewWindowRequested(
         Callback<ICoreWebView2NewWindowRequestedEventHandler>(
-            [this](ICoreWebView2* sender, ICoreWebView2NewWindowRequestedEventArgs* args) {
+            [this](
+                ICoreWebView2* sender,
+                ICoreWebView2NewWindowRequestedEventArgs* args) {
                 wil::com_ptr<ICoreWebView2Deferral> deferral;
                 CHECK_FAILURE(args->GetDeferral(&deferral));
-                RECT windowRect = {0};
-                int left = -1;
-                int top = -1;
-                int height = -1;
-                int width = -1;
-                BOOL shouldHaveToolbar = true;
 
-                AppWindow* newAppWindow;
-                if (left != -1)
-                {
-                    windowRect.left = left;
-                    windowRect.right = left + width;
-                    windowRect.top = top;
-                    windowRect.bottom = top + height;
-                    newAppWindow = new AppWindow(L"");
-                }
-                else
-                {
-                    newAppWindow = new AppWindow(L"", nullptr, true, windowRect, !!shouldHaveToolbar);
-                }
-                
+                auto newAppWindow = new AppWindow(L"");
                 newAppWindow->m_isPopupWindow = true;
                 newAppWindow->m_onWebViewFirstInitialized = [args, deferral, newAppWindow]() {
                     CHECK_FAILURE(args->put_NewWindow(newAppWindow->m_webView.get()));
@@ -1154,18 +1131,22 @@ Add the provided host object to script running in the WebView with the specified
 > public HRESULT [AddRemoteObject](#addremoteobject)(LPCWSTR name,VARIANT * object)
 
 Host objects are exposed as remote object proxies via `window.chrome.webview.remoteObjects.<name>`. Remote object proxies are promises and will resolve to an object representing the host object. The promise is rejected if the app has not added an object with the name. When JavaScript code access a property or method of the object, a promise is return, which will resolve to the value returned from the host for the property or method, or rejected in case of error such as there is no such property or method on the object or parameters are invalid. For example, when the application code does the following: 
+
 ```cpp
 VARIANT object;
 object.vt = VT_DISPATCH;
 object.pdispVal = appObject;
 webview->AddRemoteObject(L"host_object", &host);
 ```
+
  JavaScript code in the WebView will be able to access appObject as following and then access attributes and methods of appObject: 
-```cpp
+
+```js
 let app_object = await window.chrome.webview.remoteObjects.host_object;
 let attr1 = await app_object.attr1;
 let result = await app_object.method1(parameters);
 ```
+
  Note that while simple types, IDispatch and array are supported, generic IUnknown, VT_DECIMAL, or VT_RECORD variant is not supported. Remote JavaScript objects like callback functions are represented as an VT_DISPATCH VARIANT with the object implementing IDispatch. The JavaScript callback method may be invoked using DISPID_VALUE for the DISPID. Nested arrays are supported up to a depth of 3. Arrays of by reference types are not supported. VT_EMPTY and VT_NULL are mapped into JavaScript as null. In JavaScript null and undefined are mapped to VT_EMPTY.
 
 Additionally, all remote objects are exposed as `window.chrome.webview.remoteObjects.sync.<name>`. Here the host objects are exposed as synchronous remote object proxies. These are not promises and calls to functions or property access synchronously block running script waiting to communicate cross process for the host code to run. Accordingly this can result in reliability issues and it is recommended that you use the promise based asynchronous `window.chrome.webview.remoteObjects.<name>` API described above.
@@ -1196,7 +1177,7 @@ Setting a property on an asynchronous remote object proxy works slightly differe
 
 For example, suppose you have a COM object with the following interface
 
-```cpp
+```IDL
     [uuid(3a14c9c0-bc3e-453f-a314-4ce4a0ec81d8), object, local]
     interface IRemoteObjectSample : IUnknown
     {
@@ -1211,6 +1192,7 @@ For example, suppose you have a COM object with the following interface
         HRESULT CallCallbackAsynchronously([in] IDispatch* callbackParameter);
     };
 ```
+
  We can add an instance of this interface into our JavaScript with `AddRemoteObject`. In this case we name it `sample`:
 
 ```cpp
@@ -1225,9 +1207,10 @@ For example, suppose you have a COM object with the following interface
             CHECK_FAILURE(m_webView->AddRemoteObject(L"sample", &remoteObjectAsVariant));
             remoteObjectAsVariant.pdispVal->Release();
 ```
+
  Then in the HTML document we can use this COM object via `chrome.webview.remoteObjects.sample`:
 
-```cpp
+```js
         document.getElementById("getPropertyAsyncButton").addEventListener("click", async () => {
             const propertyValue = await chrome.webview.remoteObjects.sample.property;
             document.getElementById("getPropertyAsyncOutput").textContent = propertyValue;
@@ -1418,15 +1401,15 @@ Fires when content inside the WebView requested to close the window, such as aft
     // Register a handler for the WindowCloseRequested event.
     // This handler will close the app window if it is not the main window.
     CHECK_FAILURE(m_webView->add_WindowCloseRequested(
-        Callback<ICoreWebView2WindowCloseRequestedEventHandler>([this](
-                                                                    ICoreWebView2* sender,
-                                                                    IUnknown* args) {
-            if (m_isPopupWindow)
-            {
-                CloseAppWindow();
-            }
-            return S_OK;
-        }).Get(),
+        Callback<ICoreWebView2WindowCloseRequestedEventHandler>(
+            [this](ICoreWebView2* sender, IUnknown* args) {
+                if (m_isPopupWindow)
+                {
+                    CloseAppWindow();
+                }
+                return S_OK;
+            })
+            .Get(),
         nullptr));
 ```
 
@@ -1551,37 +1534,3 @@ CORE_WEBVIEW2_WEB_RESOURCE_CONTEXT_SIGNED_EXCHANGE            | Signed HTTP Exch
 CORE_WEBVIEW2_WEB_RESOURCE_CONTEXT_PING            | Ping requests.
 CORE_WEBVIEW2_WEB_RESOURCE_CONTEXT_CSP_VIOLATION_REPORT            | CSP Violation Reports.
 CORE_WEBVIEW2_WEB_RESOURCE_CONTEXT_OTHER            | Other resources.
-
-#### CORE_WEBVIEW2_MOVE_FOCUS_REASON 
-
-Reason for moving focus.
-
-> enum [CORE_WEBVIEW2_MOVE_FOCUS_REASON](#core_webview2_move_focus_reason)
-
- Values                         | Descriptions
---------------------------------|---------------------------------------------
-CORE_WEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC            | Code setting focus into WebView.
-CORE_WEBVIEW2_MOVE_FOCUS_REASON_NEXT            | Moving focus due to Tab traversal forward.
-CORE_WEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS            | Moving focus due to Tab traversal backward.
-
-#### CORE_WEBVIEW2_KEY_EVENT_KIND 
-
-The type of key event that triggered an AcceleratorKeyPressed event.
-
-> enum [CORE_WEBVIEW2_KEY_EVENT_KIND](#core_webview2_key_event_kind)
-
- Values                         | Descriptions
---------------------------------|---------------------------------------------
-CORE_WEBVIEW2_KEY_EVENT_KIND_KEY_DOWN            | Correspond to window message WM_KEYDOWN.
-CORE_WEBVIEW2_KEY_EVENT_KIND_KEY_UP            | Correspond to window message WM_KEYUP.
-CORE_WEBVIEW2_KEY_EVENT_KIND_SYSTEM_KEY_DOWN            | Correspond to window message WM_SYSKEYDOWN.
-CORE_WEBVIEW2_KEY_EVENT_KIND_SYSTEM_KEY_UP            | Correspond to window message WM_SYSKEYUP.
-
-#### CORE_WEBVIEW2_PHYSICAL_KEY_STATUS 
-
-A structure representing the information packed into the LPARAM given to a Win32 key event.
-
-> typedef [CORE_WEBVIEW2_PHYSICAL_KEY_STATUS](#core_webview2_physical_key_status)
-
-See the documentation for WM_KEYDOWN for details at [https://docs.microsoft.com/windows/win32/inputdev/wm-keydown](https://docs.microsoft.com/windows/win32/inputdev/wm-keydown)
-
